@@ -13,10 +13,11 @@ namespace covidSim.Services
         private static Game _gameInstance;
         private static Random _random = new Random();
         
-        public const int PeopleCount = 320;
+        public const int PeopleCount = 300;
         public const int FieldWidth = 1000;
         public const int FieldHeight = 500;
         public const int MaxPeopleInHouse = 10;
+        public const double InfectedPeoplePercent = 3;
 
         private Game()
         {
@@ -27,13 +28,22 @@ namespace covidSim.Services
 
         public static Game Instance => _gameInstance ?? (_gameInstance = new Game());
 
-        private List<Person> CreatePopulation()
+     private List<Person> CreatePopulation()
         {
-            return Enumerable
+            var population = Enumerable
                 .Repeat(0, PeopleCount)
-                .Select((_, index) => new Person(index, FindHome(), Map))
+                .Select((_, index) => new Person(index, FindHome(), Map, false))
                 .ToList();
+            InfectPopulation(population);
+            return population;
         }
+     
+     private void InfectPopulation(List<Person> population)
+     {
+         int peopleToInfect = (int)(population.Count * (InfectedPeoplePercent / 100));
+         foreach (var person in population.Take(peopleToInfect))
+             person.IsInfected = true;
+     }
 
         private int FindHome()
         {
